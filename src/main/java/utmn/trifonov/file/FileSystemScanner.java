@@ -44,24 +44,22 @@ public class FileSystemScanner {
             Transaction tx = session.beginTransaction();
 
             File managed = session.get(File.class, file.getId());
-            Directory managedNewParent = session.get(Directory.class, newParent.getId()); // ← важно!
+            Directory managedNewParent = session.get(Directory.class, newParent.getId());
 
             if (managed != null && managedNewParent != null) {
                 Directory oldParent = managed.getParent();
                 if (oldParent != null) {
-                    // Инициализируем коллекцию, если нужно
                     Hibernate.initialize(oldParent.getChildList());
                     oldParent.getChildList().remove(managed);
                 }
 
                 managed.setParent(managedNewParent);
 
-                // Инициализируем перед добавлением
+                //Инициализируем перед добавлением
                 Hibernate.initialize(managedNewParent.getChildList());
                 managedNewParent.getChildList().add(managed);
             }
             tx.commit();
-            // Session закроется здесь, но все изменения уже зафиксированы
         }
     }
 }

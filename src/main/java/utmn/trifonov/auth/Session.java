@@ -40,7 +40,7 @@ public class Session {
         Logger.wrn("Суперпользователь (root) не был создан, задайте пароль для него.");
 
         Logger.outL("Password: "); String providedPass = Main.getScanner().nextLine();
-        root = User.create("root", providedPass, true);
+        root = User.create("root", providedPass, true, true);
     }
 
     private static void authError(){

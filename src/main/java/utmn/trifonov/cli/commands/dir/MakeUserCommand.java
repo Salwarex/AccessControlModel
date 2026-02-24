@@ -27,7 +27,7 @@ public class MakeUserCommand extends Command {
         if(password == null || password.isEmpty() || password.isBlank())
             throw new CommandExecutionException("Введен пустой или отсутствующий пароль. Попробуйте ещё раз.");
 
-        User user = User.create(username, password, false);
+        User user = User.create(username, password, false, false);
         Directory homeDir = Directory.find(Main.getRepository(), "/home");
 
         Path userDirPath = FSUtils.getApplicationBasePath()
@@ -41,6 +41,6 @@ public class MakeUserCommand extends Command {
 
     @Override
     public boolean hasAccess() {
-        return executor.isRoot();
+        return executor.isAdmin() || executor.isRoot();
     }
 }

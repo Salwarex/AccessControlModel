@@ -17,7 +17,7 @@ public class AccessListCommand extends Command {
     private static final int READ   = 0b1000;
     private static final int WRITE  = 0b0100;
     private static final int DELETE = 0b0010;
-    private static final int TAG    = 0b0001;
+    private static final int TG     = 0b0001;
 
     public AccessListCommand(User executor, File location, String fileName, String username, Object permissionValue) throws CommandExecutionException {
         super(executor, location);
@@ -52,7 +52,7 @@ public class AccessListCommand extends Command {
 
     private int parseValue(String perm) throws CommandExecutionException{
         if(perm.startsWith("+")) { add = true; perm = perm.replace("+", ""); }
-        else if (perm.startsWith("-")) { add = true; perm = perm.replace("-", ""); }
+        else if (perm.startsWith("-")) { add = false; perm = perm.replace("-", ""); }
         else replace = true;
 
         int result = 0;
@@ -61,7 +61,7 @@ public class AccessListCommand extends Command {
                 case 'r' -> READ;
                 case 'w' -> WRITE;
                 case 'd' -> DELETE;
-                case 't' -> TAG;
+                case 't' -> TG;
                 default -> throw new CommandExecutionException("Введено неверное значение аргумента: %s".formatted(c));
             };
         }
@@ -85,6 +85,8 @@ public class AccessListCommand extends Command {
 
     @Override
     public boolean hasAccess() {
-        return executor.isRoot() || executor.getUsername().equals(targetFile.getOwner().getUsername());
+        return ((newPerms & 0b0001) != 0b0001 ? ((targetFile.getAccessValue(executor)) & 1) == 1 :
+                targetFile.getOwner().getUsername().equals(executor.getUsername()));
+        //если добавляется право не TG, то смотрит на наличие TG, если TG, то на владение файлом.
     }
 }

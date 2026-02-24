@@ -121,11 +121,9 @@ public class Directory extends File{
                         .setParameter("path", FSUtils.toRelativePath(path.normalize()))
                         .uniqueResult();
 
-                // Дополнительная страховка: инициализируем коллекции
                 if (dir != null) {
                     Hibernate.initialize(dir.getAccessList());
                     Hibernate.initialize(dir.getChildList());
-                    // Инициализируем вложенные файлы (если нужно)
                     for (File child : dir.getChildList()) {
                         Hibernate.initialize(child.getAccessList());
                         if (child.getOwner() != null) {

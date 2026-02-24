@@ -71,6 +71,18 @@ public class DirectoryLayerCommandHandler extends CommandHandler{
 
                 yield new TransferGrantsCommand(executor, location, args[0], args[1]);
             }
+            case "admin" -> {
+                if(args.length == 0)
+                    throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: admin <имя пользователя>");
+
+                yield new AdminCommand(executor, location, args[0]);
+            }
+            case "unadmin" -> {
+                if(args.length == 0)
+                    throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: unadmin <имя пользователя>");
+
+                yield new UnadminCommand(executor, location, args[0]);
+            }
             case null -> {
                 throw new CommandEmptyException();
             }

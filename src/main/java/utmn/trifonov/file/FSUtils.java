@@ -29,7 +29,7 @@ public class FSUtils {
                 return APP_BASE;
             }
         } catch (URISyntaxException e) {
-            Logger.log("⚠ Не удалось определить путь репозитория.");
+            Logger.log("Не удалось определить путь репозитория.");
         }
 
         return Paths.get(System.getProperty("user.dir")).normalize();

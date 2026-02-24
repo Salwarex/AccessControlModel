@@ -1,9 +1,5 @@
 package utmn.trifonov.cli.commands.dir;
 
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Main;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;

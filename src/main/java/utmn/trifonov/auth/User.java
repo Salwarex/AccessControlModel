@@ -6,7 +6,6 @@ import org.hibernate.Transaction;
 import utmn.trifonov.HashUtils;
 import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Logger;
-import utmn.trifonov.access.AccessSubject;
 import utmn.trifonov.file.File;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User implements AccessSubject {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,14 +27,18 @@ public class User implements AccessSubject {
     @Column(nullable = false)
     private boolean root;
 
+    @Column(nullable = false)
+    private boolean admin;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<File> ownFiles;
 
-    public User(Long id, String username, String passwordHash, boolean root, List<File> ownFiles) {
+    public User(Long id, String username, String passwordHash, boolean root, boolean admin, List<File> ownFiles) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.root = root;
+        this.admin = root || admin;
         this.ownFiles = ownFiles;
     }
 
@@ -52,6 +55,10 @@ public class User implements AccessSubject {
 
     public String getUsername() {
         return username;
+    }
+
+    public String getIdentifier(){
+        return this.getUsername();
     }
 
     public void setUsername(String username) {
@@ -72,6 +79,15 @@ public class User implements AccessSubject {
 
     public void setRoot(boolean root) {
         this.root = root;
+        this.admin = root || this.admin;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     public List<File> getOwnFiles() {
@@ -86,7 +102,7 @@ public class User implements AccessSubject {
         return HashUtils.isMatch(provided, passwordHash);
     }
 
-    public static User create(String username, String password, boolean root){
+    public static User create(String username, String password, boolean root, boolean admin){
         if (get(username) != null) {
             throw new IllegalArgumentException("Пользователь '" + username + "' уже существует");
         }
@@ -98,6 +114,8 @@ public class User implements AccessSubject {
             user.setUsername(username);
             user.setPasswordHash(HashUtils.hash(password));
             user.setRoot(root);
+            user.setAdmin(admin);
+
             user.setOwnFiles(new ArrayList<>());
 
             session.persist(user);
@@ -132,14 +150,18 @@ public class User implements AccessSubject {
         try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
 
-            User managedBook = session.get(User.class, id);
-            if (managedBook == null) {
+            User managed = session.get(User.class, id);
+            if (managed == null) {
                 throw new RuntimeException("Object not found!");
             }
             switch (variable){
                 case ROOT -> {
                     if(!(param instanceof Boolean rootBoolean)) throw new IllegalArgumentException();
-                    managedBook.setRoot(rootBoolean);
+                    managed.setRoot(rootBoolean);
+                }
+                case ADMIN -> {
+                    if(!(param instanceof Boolean adminBoolean)) throw new IllegalArgumentException();
+                    managed.setAdmin(adminBoolean);
                 }
             }
 
@@ -170,6 +192,7 @@ public class User implements AccessSubject {
     }
 
     public enum UserVariables{
-        ROOT;
+        ROOT,
+        ADMIN;
     }
 }
