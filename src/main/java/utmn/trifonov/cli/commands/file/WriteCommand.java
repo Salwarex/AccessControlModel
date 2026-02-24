@@ -15,8 +15,7 @@ public class WriteCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         if(location instanceof Directory directory)
             throw new CommandExecutionException("Данная команда недоступна в контексте редактирования директории.");
 

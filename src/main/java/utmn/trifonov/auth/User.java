@@ -6,6 +6,7 @@ import org.hibernate.Transaction;
 import utmn.trifonov.HashUtils;
 import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Logger;
+import utmn.trifonov.access.AccessSubject;
 import utmn.trifonov.file.File;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements AccessSubject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

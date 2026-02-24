@@ -22,8 +22,7 @@ public class TransferGrantsCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         if(newOwner == null)
             throw new CommandExecutionException("Указанный пользователь не найден! Перепроверьте ввод.");
 

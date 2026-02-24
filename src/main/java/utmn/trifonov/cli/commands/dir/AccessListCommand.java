@@ -70,12 +70,12 @@ public class AccessListCommand extends Command {
 
     private int parseValue(Integer perm) throws CommandExecutionException{
         replace = true;
+        if(perm > 15 || perm < 0) throw new CommandExecutionException("Введено неверное значение. Ограничение: 0 <= x <= 15");
         return perm;
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         if(targetUser == null)
             throw new CommandExecutionException("Указанный пользователь не найден! Перепроверьте ввод.");
 

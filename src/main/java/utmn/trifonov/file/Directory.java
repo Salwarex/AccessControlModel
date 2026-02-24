@@ -12,10 +12,7 @@ import utmn.trifonov.cli.CommandExecutionException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -27,9 +24,9 @@ public class Directory extends File{
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true
     )
-    private List<File> childList = new ArrayList<>(); ;
+    private Set<File> childList = new HashSet<>(); ;
 
-    public Directory(Long id, String path, User owner, Map<String, Integer> accessList, Directory parent, boolean shared, List<File> childList) {
+    public Directory(Long id, String path, User owner, Map<String, Integer> accessList, Directory parent, boolean shared, Set<File> childList) {
         super(id, path, owner, accessList, parent, shared);
         this.childList = childList;
     }
@@ -38,17 +35,16 @@ public class Directory extends File{
         super();
     }
 
-    public List<File> getChildList() {
+    public Set<File> getChildList() {
         return childList;
     }
 
-    public void setChildList(List<File> childList) {
+    public void setChildList(Set<File> childList) {
         this.childList = childList;
     }
 
     public void addChild(File child) {
-        if (!childList.contains(child)) {
-            childList.add(child);
+        if (childList.add(child)) {
             child.setParent(this);
         }
     }
@@ -74,7 +70,7 @@ public class Directory extends File{
         directory.setOwner(owner);
         directory.setAccessList(new HashMap<>());
         directory.setParent(parent);
-        directory.setChildList(new ArrayList<>());
+        directory.setChildList(new HashSet<>());
         directory.setShared(shared);
 
         try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {

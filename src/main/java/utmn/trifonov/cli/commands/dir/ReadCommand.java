@@ -22,9 +22,7 @@ public class ReadCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
-
+    public void process() throws CommandExecutionException {
         if(target instanceof Directory)
             throw new CommandExecutionException("Данная команда неприменима к директории!");
 

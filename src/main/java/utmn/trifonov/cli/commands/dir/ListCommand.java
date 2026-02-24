@@ -1,7 +1,6 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Logger;
-import utmn.trifonov.Main;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -15,9 +14,7 @@ public class ListCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
-
+    public void process() throws CommandExecutionException {
         if(!(location instanceof Directory directory))
             throw new CommandExecutionException("Данная команда недоступна в контексте редактирования файла.");
 

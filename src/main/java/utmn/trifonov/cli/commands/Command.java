@@ -1,6 +1,8 @@
 package utmn.trifonov.cli.commands;
 
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessObject;
+import utmn.trifonov.access.AccessSubject;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.FileLayerCommandHandler;
@@ -16,12 +18,19 @@ public abstract class Command {
         this.location = location;
     }
 
-    public void execute() throws CommandExecutionException{
+    public final void execute() throws CommandExecutionException{
         updateLocation();
         if(!hasAccess()) throw new CommandExecutionException("У вас нет необходимого доступа к этому файлу/директории.");
+        process();
     }
 
-    public abstract boolean hasAccess();
+    protected abstract void process() throws CommandExecutionException;
+
+    protected abstract boolean hasAccess();
+
+    private boolean hasAccess(AccessSubject subject, AccessObject object, Integer type){
+        return true; //реализация в будущем
+    }
 
     public User getExecutor() {
         return executor;

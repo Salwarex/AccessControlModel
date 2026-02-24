@@ -3,8 +3,6 @@ package utmn.trifonov.cli.commands.dir;
 import utmn.trifonov.Main;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
-import utmn.trifonov.cli.CommandHandler;
-import utmn.trifonov.cli.FileLayerCommandHandler;
 import utmn.trifonov.cli.commands.Command;
 import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.File;
@@ -24,8 +22,7 @@ public class DeleteCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         if(Objects.equals(location.getId(), target.getId())){
             Main.getCommandHandler().setLocation(File.find(location, "/"));
         }

@@ -7,7 +7,6 @@ import utmn.trifonov.cli.commands.Command;
 import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.FSUtils;
 import utmn.trifonov.file.File;
-import utmn.trifonov.file.FileSystemScanner;
 
 import java.nio.file.Path;
 
@@ -22,8 +21,7 @@ public class MakeUserCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         if(username == null || username.isEmpty() || username.isBlank())
             throw new CommandExecutionException("Введено пустое или отсутствующее имя пользователя. Попробуйте ещё раз.");
         if(password == null || password.isEmpty() || password.isBlank())

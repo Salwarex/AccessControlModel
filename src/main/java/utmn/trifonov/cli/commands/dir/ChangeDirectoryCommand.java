@@ -18,8 +18,7 @@ public class ChangeDirectoryCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         Main.getCommandHandler().getActor().setLocation(targetDir);
         Logger.pos("%s -> %s".formatted(location.getFormattedPath(), targetDir.getFormattedPath()));
     }

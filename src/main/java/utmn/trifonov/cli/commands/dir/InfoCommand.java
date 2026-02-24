@@ -7,6 +7,8 @@ import utmn.trifonov.cli.commands.Command;
 import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.File;
 
+import java.util.Map;
+
 public class InfoCommand extends Command {
     private final File target;
 
@@ -20,11 +22,18 @@ public class InfoCommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
-        super.execute();
+    public void process() throws CommandExecutionException {
         Logger.pos("Имя файла: \"%s\" | Владелец: %s | Ваши права: %s"
                 .formatted(target.getLocation().getFileName(), target.getOwner().getUsername(),
                         permissionsToStr(target.getAccessValue(executor))));
+
+        Map<String, Integer> acl = target.getAccessList();
+        System.out.println(Logger.Color.YELLOW + "------ACL------" + Logger.Color.RESET);
+        for(String key : acl.keySet()){
+            System.out.println(Logger.Color.YELLOW + key + Logger.Color.WHITE + " | "
+                    + Logger.Color.YELLOW + permissionsToStr(target.getAccessValue(key)) + Logger.Color.RESET);
+        }
+        System.out.println(Logger.Color.YELLOW + "---------------" + Logger.Color.RESET);
     }
 
     private String permissionsToStr(int value){

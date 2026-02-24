@@ -11,7 +11,7 @@ public class WhoAmICommand extends Command {
     }
 
     @Override
-    public void execute() throws CommandExecutionException {
+    public void process() throws CommandExecutionException {
         Logger.pos(executor.getUsername());
     }
 
