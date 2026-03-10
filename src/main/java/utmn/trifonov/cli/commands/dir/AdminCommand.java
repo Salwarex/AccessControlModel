@@ -29,7 +29,7 @@ public class AdminCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return executor.isRoot();
+    protected void accessSet() {
+        accessNeedRoot();
     }
 }

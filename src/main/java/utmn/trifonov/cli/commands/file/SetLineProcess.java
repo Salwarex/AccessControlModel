@@ -11,7 +11,7 @@ import utmn.trifonov.file.File;
 public class SetLineProcess extends Command {
     private final String value;
 
-    public SetLineProcess(User executor, File location, String value) {
+    public SetLineProcess(User executor, File location, String value) throws CommandExecutionException {
         super(executor, location);
         this.value = value;
     }
@@ -28,7 +28,5 @@ public class SetLineProcess extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() {}
 }

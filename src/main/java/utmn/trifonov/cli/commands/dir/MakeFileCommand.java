@@ -1,6 +1,7 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -16,7 +17,7 @@ public class MakeFileCommand extends Command {
 
     private final String fileName;
 
-    public MakeFileCommand(User executor, File location, String fileName) {
+    public MakeFileCommand(User executor, File location, String fileName) throws CommandExecutionException {
         super(executor, location);
         this.fileName = fileName;
     }
@@ -40,7 +41,7 @@ public class MakeFileCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return ((location.getAccessValue(executor) >> 2) & 1) == 1;
+    protected void accessSet() throws CommandExecutionException {
+        accessRule(location, AccessManager.WRITE);
     }
 }

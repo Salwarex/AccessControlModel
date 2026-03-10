@@ -9,7 +9,7 @@ import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.File;
 
 public class ExitCommand extends Command {
-    public ExitCommand(User executor, File location) {
+    public ExitCommand(User executor, File location) throws CommandExecutionException {
         super(executor, location);
     }
 
@@ -23,7 +23,5 @@ public class ExitCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() {}
 }

@@ -11,7 +11,7 @@ import utmn.trifonov.file.File;
 public class NewLineCommand extends Command {
     private final String value;
 
-    public NewLineCommand(User executor, File location, String value) {
+    public NewLineCommand(User executor, File location, String value) throws CommandExecutionException {
         super(executor, location);
         this.value = value;
     }
@@ -28,7 +28,6 @@ public class NewLineCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() {}
+
 }

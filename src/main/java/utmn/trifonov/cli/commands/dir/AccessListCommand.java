@@ -1,6 +1,8 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Logger;
+import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -84,8 +86,13 @@ public class AccessListCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return ((newPerms & 0b0001) != 0b0001 ? ((targetFile.getAccessValue(executor)) & 1) == 1 :
+    protected void accessSet() {
+        accessSpecific();
+    }
+
+    @Override
+    public boolean accessSpecificRule() throws CommandExecutionException {
+        return ((newPerms & 0b0001) != 0b0001 ? Main.getAccessManager().hasAccess(executor, targetFile, AccessManager.TRANSFER) :
                 targetFile.getOwner().getUsername().equals(executor.getUsername()));
         //если добавляется право не TG, то смотрит на наличие TG, если TG, то на владение файлом.
     }

@@ -1,14 +1,17 @@
 package utmn.trifonov;
 
 
+import utmn.trifonov.access.AccessManager;
+import utmn.trifonov.access.discrete.DiscreteAccessManager;
+import utmn.trifonov.access.mandatory.MandatoryAccessManager;
 import utmn.trifonov.auth.Session;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.CommandHandler;
 import utmn.trifonov.cli.CommandReceiver;
+import utmn.trifonov.cli.commands.dir.mandatory.DeleteRequestListCommand;
 import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.FSUtils;
-import utmn.trifonov.file.File;
 import utmn.trifonov.file.FileSystemScanner;
 
 import java.io.IOException;
@@ -16,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.LogManager;
 
@@ -26,6 +30,9 @@ public class Main {
     private static CommandReceiver receiver;
     public static final String REP_PATH = ".repository";
     private static final Scanner SCANNER = new Scanner(System.in);
+
+    private static AccessManager accessManager = null;
+    private static List<Class<? extends AccessManager>> managers = List.of(DiscreteAccessManager.class, MandatoryAccessManager.class);
 
     static {
         try (InputStream is = Main.class.getResourceAsStream("/logging.properties")) {
@@ -38,10 +45,31 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println("=== ACCESS CONTROL MODEL ===");
+        int select = 0;
+        while(select == 0){
+            Logger.out("Выберите модуль с моделью доступа, которая будет применяться в ходе выполнения программы:");
+            int i = 1;
+            for(Class<? extends AccessManager> clazz : managers){
+                System.out.printf("%d. %s%n", i, clazz.getName());
+                i++;
+            }
+
+            System.out.println("Введите номер: ");
+
+            try {
+                select = Integer.parseInt(SCANNER.nextLine()) - 1;
+                if(select < 0 || select >= managers.size()) throw new IllegalArgumentException();
+                accessManager = managers.get(select).getDeclaredConstructor().newInstance();
+            }catch (Exception e){
+                Logger.err("Введено нецифровое или недопустимое значение! Попробуйте ещё раз");
+            }
+        }
+
+        System.out.printf("=== %s ===%n", accessManager.getName());
         session = new Session();
 
         initRepository();
+        showDeletionRequests();
 
         receiver = new CommandReceiver(SCANNER);
         try{
@@ -53,6 +81,18 @@ public class Main {
 
         Logger.log("Выполнение программы завершено. Введите Enter для завершения.");
         SCANNER.nextLine();
+    }
+
+    private static void showDeletionRequests(){
+        if(!(accessManager instanceof MandatoryAccessManager manager)) return;
+        User user = session.getUser();
+        if(!user.isAdmin() && user.isRoot()) return;
+
+        try{
+            new DeleteRequestListCommand(user, repository);
+        }catch (CommandExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void initRepository(){
@@ -100,5 +140,10 @@ public class Main {
 
     public static Directory getRepository(){
         return repository;
+    }
+
+    public static AccessManager getAccessManager(){
+        if(accessManager == null) Logger.wrn("Access Manager is null!");
+        return accessManager;
     }
 }

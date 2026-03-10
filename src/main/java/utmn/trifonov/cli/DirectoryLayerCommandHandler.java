@@ -5,6 +5,7 @@ import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.commands.Command;
 import utmn.trifonov.cli.commands.WhoAmICommand;
 import utmn.trifonov.cli.commands.dir.*;
+import utmn.trifonov.cli.commands.dir.mandatory.*;
 import utmn.trifonov.file.Directory;
 
 public class DirectoryLayerCommandHandler extends CommandHandler{
@@ -53,6 +54,12 @@ public class DirectoryLayerCommandHandler extends CommandHandler{
 
                 yield new InfoCommand(executor, location, args[0]);
             }
+            case "userinfo" -> {
+                if(args.length == 0)
+                    throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: userinfo <имя пользователя>");
+
+                yield new InfoUserCommand(executor, location, args[0]);
+            }
             case "read" -> {
                 if(args.length == 0)
                     throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: read <имя файла>");
@@ -82,6 +89,25 @@ public class DirectoryLayerCommandHandler extends CommandHandler{
                     throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: unadmin <имя пользователя>");
 
                 yield new UnadminCommand(executor, location, args[0]);
+            }
+            case "dr-accept" -> {
+                if(args.length == 0)
+                    throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: accept-request <ID запроса>");
+
+                yield new AcceptRequestCommand(executor, location, args[0]);
+            }
+            case "dr-decline" -> {
+                if(args.length == 0)
+                    throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: decline-request <ID запроса>");
+
+                yield new DeclineRequestCommand(executor, location, args[0]);
+            }
+            case "dr-ls" -> new DeleteRequestListCommand(executor, location);
+            case "ml" -> {
+                if(args.length < 2)
+                    throw new CommandExecutionException("Данная команда предполагает наличие двух аргумента: ml <целевой файл/имя пользователя> <устанавливаемый уровень>");
+
+                yield new SetMandatoryLevelCommand(executor, location, args[0], args[1]);
             }
             case null -> {
                 throw new CommandEmptyException();

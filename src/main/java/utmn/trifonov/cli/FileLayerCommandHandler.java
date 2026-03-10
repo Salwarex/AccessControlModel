@@ -102,7 +102,7 @@ public class FileLayerCommandHandler extends CommandHandler{
         User executor = Main.getSession().getUser();
         return switch(command){
             case "exit" -> new ExitCommand(executor, location);
-            case "ls" -> new OutCommand(executor, location);
+            case "ls" -> new ListLinesCommand(executor, location);
             case "line" -> {
                 if(args.length == 0)
                     throw new CommandExecutionException("Данная команда предполагает наличие одного аргумента: line <индекс строки>");

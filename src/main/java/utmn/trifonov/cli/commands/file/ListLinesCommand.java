@@ -8,8 +8,8 @@ import utmn.trifonov.cli.commands.Command;
 import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.File;
 
-public class OutCommand extends Command {
-    public OutCommand(User executor, File location) {
+public class ListLinesCommand extends Command {
+    public ListLinesCommand(User executor, File location) throws CommandExecutionException {
         super(executor, location);
     }
 
@@ -25,7 +25,5 @@ public class OutCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() {}
 }

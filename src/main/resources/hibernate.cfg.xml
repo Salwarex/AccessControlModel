@@ -22,5 +22,6 @@
         <mapping class="utmn.trifonov.auth.User"/>
         <mapping class="utmn.trifonov.file.File"/>
         <mapping class="utmn.trifonov.file.Directory"/>
+        <mapping class="utmn.trifonov.access.mandatory.MandatoryDeleteRequest"/>
     </session-factory>
 </hibernate-configuration>

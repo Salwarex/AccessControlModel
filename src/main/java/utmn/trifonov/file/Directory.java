@@ -6,6 +6,7 @@ import org.hibernate.Transaction;
 import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Logger;
 import utmn.trifonov.Main;
+import utmn.trifonov.access.mandatory.MandatoryDeleteRequest;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 
@@ -26,8 +27,8 @@ public class Directory extends File{
     )
     private Set<File> childList = new HashSet<>(); ;
 
-    public Directory(Long id, String path, User owner, Map<String, Integer> accessList, Directory parent, boolean shared, Set<File> childList) {
-        super(id, path, owner, accessList, parent, shared);
+    public Directory(Long id, String path, User owner, Directory parent, Map<String, Integer> accessList, boolean shared, int mandatoryLevel, List<MandatoryDeleteRequest> deleteRequests, Set<File> childList) {
+        super(id, path, owner, parent, accessList, shared, mandatoryLevel, deleteRequests);
         this.childList = childList;
     }
 
@@ -72,6 +73,8 @@ public class Directory extends File{
         directory.setParent(parent);
         directory.setChildList(new HashSet<>());
         directory.setShared(shared);
+        directory.setMandatoryLevel(owner.getMandatoryLevel());
+        directory.setDeleteRequests(new ArrayList<>());
 
         try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();

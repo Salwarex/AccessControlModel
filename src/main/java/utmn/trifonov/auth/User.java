@@ -6,6 +6,10 @@ import org.hibernate.Transaction;
 import utmn.trifonov.HashUtils;
 import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Logger;
+import utmn.trifonov.access.discrete.DiscreteSubject;
+import utmn.trifonov.access.mandatory.MandatoryDeleteRequest;
+import utmn.trifonov.access.mandatory.MandatorySubject;
+import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.file.File;
 
 import java.util.ArrayList;
@@ -13,7 +17,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements DiscreteSubject, MandatorySubject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,16 +34,24 @@ public class User {
     @Column(nullable = false)
     private boolean admin;
 
+    @Column(nullable = false)
+    private int mandatoryLevel;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<File> ownFiles;
 
-    public User(Long id, String username, String passwordHash, boolean root, boolean admin, List<File> ownFiles) {
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<MandatoryDeleteRequest> deleteRequests;
+
+    public User(Long id, String username, String passwordHash, boolean root, boolean admin, List<File> ownFiles, int mandatoryLevel, List<MandatoryDeleteRequest> deleteRequests) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.root = root;
         this.admin = root || admin;
         this.ownFiles = ownFiles;
+        this.mandatoryLevel = mandatoryLevel;
+        this.deleteRequests = deleteRequests;
     }
 
     public User() {
@@ -73,6 +85,7 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
+    @Override
     public boolean isRoot() {
         return root;
     }
@@ -82,6 +95,7 @@ public class User {
         this.admin = root || this.admin;
     }
 
+    @Override
     public boolean isAdmin() {
         return admin;
     }
@@ -98,13 +112,23 @@ public class User {
         this.ownFiles = ownFiles;
     }
 
+    public void setMandatoryLevel(int mandatoryLevel){ this.mandatoryLevel = mandatoryLevel; }
+
     public boolean passwordMatch(String provided){
         return HashUtils.isMatch(provided, passwordHash);
     }
 
-    public static User create(String username, String password, boolean root, boolean admin){
+    public List<MandatoryDeleteRequest> getDeleteRequests() {
+        return deleteRequests;
+    }
+
+    public void setDeleteRequests(List<MandatoryDeleteRequest> deleteRequests) {
+        this.deleteRequests = deleteRequests;
+    }
+
+    public static User create(String username, String password, boolean root, boolean admin, int mandatoryLevel) throws CommandExecutionException {
         if (get(username) != null) {
-            throw new IllegalArgumentException("Пользователь '" + username + "' уже существует");
+            throw new CommandExecutionException("Пользователь '" + username + "' уже существует");
         }
 
         try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -115,6 +139,8 @@ public class User {
             user.setPasswordHash(HashUtils.hash(password));
             user.setRoot(root);
             user.setAdmin(admin);
+            user.setMandatoryLevel(mandatoryLevel);
+            user.setDeleteRequests(new ArrayList<>());
 
             user.setOwnFiles(new ArrayList<>());
 
@@ -163,6 +189,10 @@ public class User {
                     if(!(param instanceof Boolean adminBoolean)) throw new IllegalArgumentException();
                     managed.setAdmin(adminBoolean);
                 }
+                case MANDATORY -> {
+                    if(!(param instanceof Integer level) || level < 0) throw new IllegalArgumentException();
+                    managed.setMandatoryLevel(level);
+                }
             }
 
             tx.commit();
@@ -191,8 +221,19 @@ public class User {
         }
     }
 
+    @Override
+    public String getAccessSubjectIdentifier() {
+        return this.username;
+    }
+
+    @Override
+    public int getMandatoryLevel() {
+        return mandatoryLevel;
+    }
+
     public enum UserVariables{
         ROOT,
-        ADMIN;
+        ADMIN,
+        MANDATORY;
     }
 }

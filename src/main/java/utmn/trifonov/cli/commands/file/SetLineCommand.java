@@ -11,7 +11,7 @@ import utmn.trifonov.file.File;
 public class SetLineCommand  extends Command {
     private final int lineIndex;
 
-    public SetLineCommand(User executor, File location, int index) {
+    public SetLineCommand(User executor, File location, int index) throws CommandExecutionException {
         super(executor, location);
         this.lineIndex = index;
     }
@@ -28,7 +28,6 @@ public class SetLineCommand  extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() {}
+
 }

@@ -1,6 +1,7 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Logger;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -23,9 +24,9 @@ public class InfoCommand extends Command {
 
     @Override
     public void process() throws CommandExecutionException {
-        Logger.pos("Имя файла: \"%s\" | Владелец: %s | Ваши права: %s"
+        Logger.pos("Имя файла: \"%s\" | Владелец: %s | Ваши права (D/R): %s | Уровень доступа (M): %d"
                 .formatted(target.getLocation().getFileName(), target.getOwner().getUsername(),
-                        permissionsToStr(target.getAccessValue(executor))));
+                        permissionsToStr(target.getAccessValue(executor)), target.getMandatoryLevel()));
 
         Map<String, Integer> acl = target.getAccessList();
         System.out.println(Logger.Color.YELLOW + "------ACL------" + Logger.Color.RESET);
@@ -34,6 +35,11 @@ public class InfoCommand extends Command {
                     + Logger.Color.YELLOW + permissionsToStr(target.getAccessValue(key)) + Logger.Color.RESET);
         }
         System.out.println(Logger.Color.YELLOW + "---------------" + Logger.Color.RESET);
+    }
+
+    @Override
+    protected void accessSet() throws CommandExecutionException {
+        accessRule(target, AccessManager.READ);
     }
 
     private String permissionsToStr(int value){
@@ -49,10 +55,5 @@ public class InfoCommand extends Command {
         }
 
         return result.toString();
-    }
-
-    @Override
-    public boolean hasAccess() {
-        return ((target.getAccessValue(executor) >> 3) & 1) == 1;
     }
 }

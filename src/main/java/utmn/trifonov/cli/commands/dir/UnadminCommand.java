@@ -1,6 +1,7 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Logger;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -29,8 +30,8 @@ public class UnadminCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return executor.isRoot();
+    protected void accessSet() {
+        accessNeedRoot();
     }
 }
 

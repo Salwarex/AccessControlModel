@@ -1,6 +1,7 @@
 package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -31,7 +32,7 @@ public class DeleteCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return ((target.getAccessValue(executor) >> 1) & 1) == 1;
+    protected void accessSet() throws CommandExecutionException {
+        accessRule(target, AccessManager.DELETE);
     }
 }

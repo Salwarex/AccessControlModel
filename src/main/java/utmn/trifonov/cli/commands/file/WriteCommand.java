@@ -2,6 +2,7 @@ package utmn.trifonov.cli.commands.file;
 
 import utmn.trifonov.Logger;
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.FileLayerCommandHandler;
@@ -10,7 +11,7 @@ import utmn.trifonov.file.Directory;
 import utmn.trifonov.file.File;
 
 public class WriteCommand extends Command {
-    public WriteCommand(User executor, File location) {
+    public WriteCommand(User executor, File location) throws CommandExecutionException {
         super(executor, location);
     }
 
@@ -27,7 +28,7 @@ public class WriteCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return ((location.getAccessValue(executor) >> 2) & 1) == 1;
+    protected void accessSet() throws CommandExecutionException {
+        accessRule(location, AccessManager.WRITE);
     }
 }

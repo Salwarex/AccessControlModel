@@ -6,7 +6,7 @@ import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.file.File;
 
 public class WhoAmICommand extends Command {
-    public WhoAmICommand(User executor, File location) {
+    public WhoAmICommand(User executor, File location) throws CommandExecutionException {
         super(executor, location);
     }
 
@@ -16,7 +16,6 @@ public class WhoAmICommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return true;
-    }
+    protected void accessSet() throws CommandExecutionException {}
+
 }

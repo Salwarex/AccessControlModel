@@ -2,6 +2,7 @@ package utmn.trifonov.auth;
 
 import utmn.trifonov.Logger;
 import utmn.trifonov.Main;
+import utmn.trifonov.cli.CommandExecutionException;
 
 public class Session {
     private User user;
@@ -40,7 +41,11 @@ public class Session {
         Logger.wrn("Суперпользователь (root) не был создан, задайте пароль для него.");
 
         Logger.outL("Password: "); String providedPass = Main.getScanner().nextLine();
-        root = User.create("root", providedPass, true, true);
+        try{
+            root = User.create("root", providedPass, true, true, -1);
+        }catch (CommandExecutionException e){
+            Logger.err(e.getMessage());
+        }
     }
 
     private static void authError(){

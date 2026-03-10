@@ -7,6 +7,11 @@ import org.hibernate.Transaction;
 import utmn.trifonov.HibernateUtil;
 import utmn.trifonov.Logger;
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessSubject;
+import utmn.trifonov.access.discrete.DiscreteObject;
+import utmn.trifonov.access.discrete.DiscreteSubject;
+import utmn.trifonov.access.mandatory.MandatoryDeleteRequest;
+import utmn.trifonov.access.mandatory.MandatoryObject;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 
@@ -14,6 +19,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +30,7 @@ import java.util.stream.Stream;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "file_type", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("FILE")
-public class File {
+public class File implements DiscreteObject, MandatoryObject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,13 +58,21 @@ public class File {
     @Column(nullable = false)
     private boolean shared;
 
-    public File(Long id, String path, User owner, Map<String, Integer> accessList, Directory parent, boolean shared) {
+    @Column(nullable = false)
+    private int mandatoryLevel;
+
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<MandatoryDeleteRequest> deleteRequests;
+
+    public File(Long id, String path, User owner, Directory parent, Map<String, Integer> accessList, boolean shared, int mandatoryLevel, List<MandatoryDeleteRequest> deleteRequests) {
         this.id = id;
         this.path = path;
         this.owner = owner;
-        this.accessList = accessList;
         this.parent = parent;
+        this.accessList = accessList;
         this.shared = shared;
+        this.mandatoryLevel = mandatoryLevel;
+        this.deleteRequests = deleteRequests;
     }
 
     public File() {
@@ -125,6 +139,7 @@ public class File {
         this.shared = shared;
     }
 
+    @Override
     public int getAccessValue(String key){
         if(key == null || key.isEmpty() || key.isBlank()) return 0;
         if(owner.getUsername().equals(key) || "root".equals(key))
@@ -135,10 +150,19 @@ public class File {
         return accessList.get(key);
     }
 
-    public int getAccessValue(User user){
-        if(user == null) return 0;
-        if(user.isRoot()) return (Main.getRepository().getId().equals(this.getId()) ? 0b1100 : 0b1111); //Нельзя удалять и передавать главную директорию, остальное: r+w+d+tg
-        return getAccessValue(user.getUsername());
+    @Override
+    public int getAccessValue(DiscreteSubject subject) {
+        if(subject == null) return 0;
+        if(subject.isRoot()) return (Main.getRepository().getId().equals(this.getId()) ? 0b1100 : 0b1111); //Нельзя удалять и передавать главную директорию, остальное: r+w+d+tg
+        return getAccessValue(subject.getAccessSubjectIdentifier());
+    }
+
+    public List<MandatoryDeleteRequest> getDeleteRequests() {
+        return deleteRequests;
+    }
+
+    public void setDeleteRequests(List<MandatoryDeleteRequest> deleteRequests) {
+        this.deleteRequests = deleteRequests;
     }
 
     //Static operations
@@ -155,6 +179,8 @@ public class File {
         file.setAccessList(new HashMap<>());
         file.setParent(parent);
         file.setShared(shared);
+        file.setMandatoryLevel(owner.getMandatoryLevel());
+        file.setDeleteRequests(new ArrayList<>());
 
         try (org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction tx = session.beginTransaction();
@@ -219,6 +245,10 @@ public class File {
                 case ACCESS_LIST -> {
                     if(!(param instanceof HashMap accessMap)) throw new IllegalArgumentException();
                     managedFile.setAccessList(accessMap);
+                }
+                case MANDATORY -> {
+                    if(!(param instanceof Integer level) || level < 0) throw new IllegalArgumentException();
+                    managedFile.setMandatoryLevel(level);
                 }
             }
 
@@ -317,8 +347,28 @@ public class File {
         }
     }
 
+    @Override
+    public String getAccessObjectIdentifier() {
+        return this.getPath();
+    }
+
+    @Override
+    public boolean isOwner(AccessSubject subject) {
+        return subject.getAccessSubjectIdentifier().equals(owner.getAccessSubjectIdentifier());
+    }
+
+    @Override
+    public int getMandatoryLevel() {
+        return mandatoryLevel;
+    }
+
+    public void setMandatoryLevel(int mandatoryLevel) {
+        this.mandatoryLevel = mandatoryLevel;
+    }
+
     public enum FileVariables{
         OWNER,
-        ACCESS_LIST
+        ACCESS_LIST,
+        MANDATORY
     }
 }

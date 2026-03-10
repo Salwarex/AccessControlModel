@@ -32,7 +32,7 @@ public class TransferGrantsCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return target.getOwner().getUsername().equals(executor.getUsername());
+    protected void accessSet() {
+        accessNeedOwner();
     }
 }

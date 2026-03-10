@@ -2,6 +2,7 @@ package utmn.trifonov.cli.commands.dir;
 
 import utmn.trifonov.Logger;
 import utmn.trifonov.Main;
+import utmn.trifonov.access.AccessManager;
 import utmn.trifonov.auth.User;
 import utmn.trifonov.cli.CommandExecutionException;
 import utmn.trifonov.cli.commands.Command;
@@ -24,7 +25,7 @@ public class ChangeDirectoryCommand extends Command {
     }
 
     @Override
-    public boolean hasAccess() {
-        return (targetDir.getAccessValue(executor) >> 3 & 1) == 1;
+    protected void accessSet() throws CommandExecutionException {
+        accessRule(targetDir, AccessManager.READ);
     }
 }
